@@ -216,4 +216,4 @@ for (var i = 0; i < ads.length; i++) {
 }
 
 //Добавляем карточку на страницу
-document.querySelector('.map').insertBefore(generateCard(ads[0]), mapFilters);
+document.querySelector('.map').insertBefore(generateCard(ads[0]), mapFilters)
