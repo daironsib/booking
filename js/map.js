@@ -44,40 +44,42 @@ var photos = [
     `http://o0.github.io/assets/images/tokyo/hotel3.jpg`
 ]
 
-var ads = []
+var offers = []
 
-//Находим шаблон для меток
+var offersMap = {}
+
+// Находим шаблон для меток
 var mapPinTemplate = document.querySelector(`template`).content.querySelector(`.map__pin`)
 
-//Находим шаблон для карточки
+// Находим шаблон для карточки
 var mapCardTemplate = document.querySelector(`template`).content.querySelector(`.map__card`)
 
-//Находим область меток
+// Находим область меток
 var mapPins = document.querySelector(`.map__pins`)
 
-//Находим область фильтров
+// Находим область фильтров
 var mapFilters = document.querySelector(`.map__filters-container`)
 
-//Находим плавающую метку
+// Находим плавающую метку
 var mapPinMain = document.querySelector(`.map__pin--main`)
 
-//Находим инпут с адресом
+// Находим инпут с адресом
 var adrInput = document.querySelector('#address');
 
 
-//Генерация случайных чисел в диапазоне
+// Генерация случайных чисел в диапазоне
 function randomInteger(min, max) {
     var rand = min - 0.5 + Math.random() * (max - min + 1)
     rand = Math.round(rand);
     return rand;
 }
 
-//Функция для случайной сортировки массива
+// Функция для случайной сортировки массива
 function compareRandom(a, b) {
     return Math.random() - 0.5;
 }
 
-//Функция генерации фичь объекта недвижимости
+// Функция генерации фичь объекта недвижимости
 function getFeatures(array) {
     var limit = randomInteger(1, array.length - 1)
     var newArray = []
@@ -89,15 +91,15 @@ function getFeatures(array) {
     return newArray
 }
 
-//Функция генерации данных
+// Функция генерации данных
 function generateData() {
-    var newAds = []
+    var newOffers = []
 
     for (var i = 1; i < 9; i++) {
         var x = randomInteger(300, 900);
         var y = randomInteger(150, 500);
 
-        newAds.push(
+        newOffers.push(
             {
                 author: {
                     avatar: `img/avatars/user0` + i + `.png`
@@ -124,10 +126,10 @@ function generateData() {
         )
     }
 
-    return newAds
+    return newOffers
 }
 
-//Функция генерации метки
+// Функция генерации метки
 function generatePin(item) {
     var mapPin = mapPinTemplate.cloneNode(true)
     mapPin.style = `left: ` + item.location.x + `px; top: ` + item.location.y + `px;`
@@ -137,30 +139,18 @@ function generatePin(item) {
     return mapPin
 }
 
-//Функция генерации карточки
+// Функция генерации карточки
 function generateCard(item) {
     var mapCard = mapCardTemplate.cloneNode(true)
 
-    //Выведите заголовок объявления offer.title в заголовок .popup__title.
     mapCard.querySelector(`.popup__title`).textContent = item.offer.title
-
-    //Выведите адрес offer.address в блок .popup__text--address.
     mapCard.querySelector(`.popup__text--address`).textContent = item.offer.address
-
-    //Выведите цену offer.price в блок .popup__text--price строкой вида {{offer.price}}₽/ночь. Например, 5200₽/ночь.
     mapCard.querySelector(`.popup__text--price`).textContent = item.offer.price + `₽/ночь`
-
-    //В блок .popup__type выведите тип жилья offer.type: Квартира для flat, Бунгало для bungalo, Дом для house, Дворец для palace.
     mapCard.querySelector(`.popup__type`).textContent = typesNames[item.offer.type]
-
-    //Выведите количество гостей и комнат offer.rooms и offer.guests в блок .popup__text--capacity строкой вида {{offer.rooms}} комнаты для {{offer.guests}} гостей. Например, 2 комнаты для 3 гостей.
     mapCard.querySelector(`.popup__text--capacity`).textContent = item.offer.rooms + ` комнаты для ` + item.offer.guests + ` гостей`
-
-    //Время заезда и выезда offer.checkin и offer.checkout в блок .popup__text--time строкой вида Заезд после {{offer.checkin}}, выезд до {{offer.checkout}}. Например, заезд после 14:00, выезд до 12:00.
     mapCard.querySelector(`.popup__text--time`).textContent = `Заезд после ` + item.offer.checkin + `, выезд до ` + item.offer.checkout
 
-    //В список .popup__features выведите все доступные удобства в объявлении.
-    var featuresBlock = mapCard.querySelector(`.popup__features`)
+   var featuresBlock = mapCard.querySelector(`.popup__features`)
     featuresBlock.innerHTML = ''
 
     for (var i = 0; i < item.offer.features.length; i++) {
@@ -169,10 +159,8 @@ function generateCard(item) {
         featuresBlock.appendChild(feature)
     }
 
-    //В блок popup__description выведите описание объекта недвижимости offer.description.
     mapCard.querySelector(`.popup__description`).textContent = item.offer.description
 
-    //В блок .popup__photos выведите все фотографии из списка offer.photos. Каждая из строк массива photos должна записываться как src соответствующего изображения.
     var photoBlock = mapCard.querySelector(`.popup__photos`)
     var photoItem = photoBlock.querySelector(`img`)
     photoBlock.removeChild(photoItem)
@@ -183,24 +171,41 @@ function generateCard(item) {
         photoBlock.appendChild(photo)
     }
 
-    //Замените src у аватарки пользователя — изображения, которое записано в .popup__avatar — на значения поля author.avatar отрисовываемого объекта.
     mapCard.querySelector(`.popup__avatar`).src = item.author.avatar
 
     return mapCard
 }
 
-//Функция генерации меток
-function generatePins(data) {
+// Функция отрисовки меток
+function renderPins(data) {
     for (var i = 0; i < data.length; i++) {
+        // Создаем новую метку
+        var newPin = generatePin(data[i])
+        newPin.id = `pin${i}`
+
+        // Вставляем метку в DOM
         var fragment = document.createDocumentFragment()
-        fragment.appendChild(generatePin(data[i]))
+        fragment.appendChild(newPin)
         mapPins.appendChild(fragment)
+
+        // Заполняем карту карточек для меток
+        offersMap[`pin${i}`] = offers[i]
     }
 }
 
-//Функция включения активного состояния карты
+// Функция отрисовки карточки для метки
+function renderCards(data) {
+    // Если карточка уже есть в DOM удаляем ее
+    var createdCard = document.querySelector(`.map__card`)
+    if (createdCard) {
+        createdCard.remove()
+    }
+    document.querySelector(`.map`).insertBefore(generateCard(offersMap[data]), mapFilters)
+}
+
+// Функция включения активного состояния карты
 function onActiveState() {
-    //Включаем карту
+    // Включаем карту
     document.querySelector(`.map`).classList.remove(`map--faded`)
     var adForm = document.querySelector(`.ad-form`)
     adForm.classList.remove(`ad-form--disabled`)
@@ -210,30 +215,19 @@ function onActiveState() {
         allFieldsets[i].disabled = false
     }
 
-    //Удаляем прослушку события
+    // Удаляем прослушку события
     mapPinMain.removeEventListener('mouseup', function() {})
 
-    //Создаем метки похожих объектов
-    generatePins(ads)
+    // Отрисовываем метки похожих объектов
+    renderPins(offers)
 
-    //Добавляем карточки для меток на страницу
-    for (var i = 0; i < ads.length; i++) {
-        document.querySelector(`.map`).insertBefore(generateCard(ads[i]), mapFilters)
-    }
-
-    //Скрываем карточки
-    var mapCardsAll = document.querySelectorAll(`.map__card`)
-
-    for(var i = 0; i < mapCardsAll.length; i++) {
-        mapCardsAll[i].classList.add(`hidden`)
-    }
-
-    //Вызываем прослушку события клик по метке
+    // Вызываем прослушку события клик по метке
     var mapPinsAll = document.querySelectorAll(`.map__pin`)
 
     for (var i = 1; i < mapPinsAll.length; i++) {
         mapPinsAll[i].addEventListener('click', function(e) {
-            console.log(e)
+            var idCurrentPin = e.path[1].id
+            renderCards(idCurrentPin)
         })
     }
 }
@@ -246,11 +240,11 @@ function getAdress (el) {
     adrInput.value = left + ', ' + top
 }
 
-//Генерируем данные
-ads = generateData()
+// Генерируем данные
+offers = generateData()
 
-//Получаем адрес метки
+// Получаем адрес метки
 getAdress(mapPinMain)
 
-//После перетаскивания основной метки переводим приложение в активный режим
+// После перетаскивания основной метки переводим приложение в активный режим
 mapPinMain.addEventListener(`mouseup`, onActiveState)
