@@ -58,6 +58,12 @@ var mapPins = document.querySelector(`.map__pins`)
 //Находим область фильтров
 var mapFilters = document.querySelector(`.map__filters-container`)
 
+//Находим плавающую метку
+var mapPinMain = document.querySelector(`.map__pin--main`)
+
+//Находим инпут с адресом
+var adrInput = document.querySelector('#address');
+
 
 //Генерация случайных чисел в диапазоне
 function randomInteger(min, max) {
@@ -94,7 +100,7 @@ function generateData() {
         newAds.push(
             {
                 author: {
-                    avatar: "img/avatars/user0" + i + ".png"
+                    avatar: `img/avatars/user0` + i + `.png`
                 },
                 offer: {
                     title: titles[i-1],
@@ -124,9 +130,9 @@ function generateData() {
 //Функция генерации метки
 function generatePin(item) {
     var mapPin = mapPinTemplate.cloneNode(true)
-    mapPin.style = "left: " + item.location.x + "px; top: " + item.location.y + "px;"
-    mapPin.querySelector("img").src = item.author.avatar
-    mapPin.querySelector("img").alt = item.offer.title
+    mapPin.style = `left: ` + item.location.x + `px; top: ` + item.location.y + `px;`
+    mapPin.querySelector(`img`).src = item.author.avatar
+    mapPin.querySelector(`img`).alt = item.offer.title
 
     return mapPin
 }
@@ -192,14 +198,59 @@ function generatePins(data) {
     }
 }
 
+//Функция включения активного состояния карты
+function onActiveState() {
+    //Включаем карту
+    document.querySelector(`.map`).classList.remove(`map--faded`)
+    var adForm = document.querySelector(`.ad-form`)
+    adForm.classList.remove(`ad-form--disabled`)
+    var allFieldsets = adForm.querySelectorAll(`fieldset`)
+
+    for(var i = 0; i < allFieldsets.length; i++) {
+        allFieldsets[i].disabled = false
+    }
+
+    //Удаляем прослушку события
+    mapPinMain.removeEventListener('mouseup', function() {})
+
+    //Создаем метки похожих объектов
+    generatePins(ads)
+
+    //Добавляем карточки для меток на страницу
+    for (var i = 0; i < ads.length; i++) {
+        document.querySelector(`.map`).insertBefore(generateCard(ads[i]), mapFilters)
+    }
+
+    //Скрываем карточки
+    var mapCardsAll = document.querySelectorAll(`.map__card`)
+
+    for(var i = 0; i < mapCardsAll.length; i++) {
+        mapCardsAll[i].classList.add(`hidden`)
+    }
+
+    //Вызываем прослушку события клик по метке
+    var mapPinsAll = document.querySelectorAll(`.map__pin`)
+
+    for (var i = 1; i < mapPinsAll.length; i++) {
+        mapPinsAll[i].addEventListener('click', function(e) {
+            console.log(e)
+        })
+    }
+}
+
+// Функция координаты плавающей метки
+function getAdress (el) {
+    el = el.getBoundingClientRect()
+    var left = el.left + window.scrollX + 20
+    var top = el.top + window.scrollY + 22
+    adrInput.value = left + ', ' + top
+}
+
 //Генерируем данные
 ads = generateData()
 
-//Включаем карту
-document.querySelector(`.map`).classList.remove(`map--faded`)
+//Получаем адрес метки
+getAdress(mapPinMain)
 
-//Создаем метки
-generatePins(ads)
-
-//Добавляем карточку на страницу
-document.querySelector(`.map`).insertBefore(generateCard(ads[0]), mapFilters);
+//После перетаскивания основной метки переводим приложение в активный режим
+mapPinMain.addEventListener(`mouseup`, onActiveState)
