@@ -201,6 +201,9 @@ function renderCards(data) {
         createdCard.remove()
     }
     document.querySelector(`.map`).insertBefore(generateCard(offersMap[data]), mapFilters)
+
+    // Вешаем обработчик на закрытие карточки
+    document.querySelector(`.popup__close`).addEventListener(`click`, closeCardPopup)
 }
 
 // Функция включения активного состояния карты
@@ -216,7 +219,7 @@ function onActiveState() {
     }
 
     // Удаляем прослушку события
-    mapPinMain.removeEventListener('mouseup', function() {})
+    mapPinMain.removeEventListener(`mouseup`, function() {})
 
     // Отрисовываем метки похожих объектов
     renderPins(offers)
@@ -225,7 +228,7 @@ function onActiveState() {
     var mapPinsAll = document.querySelectorAll(`.map__pin`)
 
     for (var i = 1; i < mapPinsAll.length; i++) {
-        mapPinsAll[i].addEventListener('click', function(e) {
+        mapPinsAll[i].addEventListener(`click`, function(e) {
             var idCurrentPin = e.path[1].id
             renderCards(idCurrentPin)
         })
@@ -238,6 +241,12 @@ function getAdress (el) {
     var left = el.left + window.scrollX + 20
     var top = el.top + window.scrollY + 22
     adrInput.value = left + ', ' + top
+}
+
+//Функция закрытия карточки
+function closeCardPopup() {
+    document.querySelector(`.popup__close`).removeEventListener(`click`, function(){})
+    document.querySelector(`.map__card`).remove()
 }
 
 // Генерируем данные
