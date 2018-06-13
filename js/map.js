@@ -227,19 +227,17 @@ function onActiveState() {
 
     for (var i = 1; i < mapPinsAll.length; i++) {
         mapPinsAll[i].addEventListener(`click`, function(e) {
-            if (e.target.getAttribute(`class`) === `map__pin`) {
-                var pinNode = e.target
-                renderCard(pinNode)
+            if (e.target.classList.contains(`map__pin`)) {
+                renderCard(e.target)
             } else {
-                var pinNode = e.target.parentNode
-                renderCard(pinNode)
+                renderCard(e.target.parentNode)
             }
         })
     }
 }
 
 // Функция координаты плавающей метки
-function setCordsToAddressInput (el) {
+function setCoords (el) {
     el = el.getBoundingClientRect()
     var left = el.left + window.scrollX + 20
     var top = el.top + window.scrollY + 22
@@ -256,7 +254,7 @@ function closeCardPopup() {
 offers = generateData()
 
 // Передаем координаты адреса основной метки в инпут формы
-setCordsToAddressInput(mapPinMain)
+setCoords(mapPinMain)
 
 // После перетаскивания основной метки переводим приложение в активный режим
 mapPinMain.addEventListener(`mouseup`, onActiveState)
