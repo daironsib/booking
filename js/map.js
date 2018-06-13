@@ -184,12 +184,10 @@ function renderCard(node) {
         createdCard.remove()
     }
 
-    if (offersMap.get(node) !== undefined) {
-        document.querySelector(`.map`).insertBefore(generateCard(offersMap.get(node)), mapFilters)
+    document.querySelector(`.map`).insertBefore(generateCard(offersMap.get(node)), mapFilters)
 
-        // Вешаем обработчик на закрытие карточки
-        document.querySelector(`.popup__close`).addEventListener(`click`, closeCardPopup)
-    }
+    // Вешаем обработчик на закрытие карточки
+    document.querySelector(`.popup__close`).addEventListener(`click`, closeCardPopup)
 }
 
 // Функция включения активного состояния карты
@@ -229,8 +227,13 @@ function onActiveState() {
 
     for (var i = 1; i < mapPinsAll.length; i++) {
         mapPinsAll[i].addEventListener(`click`, function(e) {
-            var pinNode = e.path[1]
-            renderCard(pinNode)
+            if (e.target.getAttribute(`class`) === `map__pin`) {
+                var pinNode = e.target
+                renderCard(pinNode)
+            } else {
+                var pinNode = e.target.parentNode
+                renderCard(pinNode)
+            }
         })
     }
 }
