@@ -46,7 +46,7 @@ var photos = [
 
 var offers = []
 
-var offersMap = {}
+var offersMap = new Map()
 
 // Находим шаблон для меток
 var mapPinTemplate = document.querySelector(`template`).content.querySelector(`.map__pin`)
@@ -130,13 +130,13 @@ function generateData() {
 }
 
 // Функция генерации метки
-function generatePin(item) {
-    var mapPin = mapPinTemplate.cloneNode(true)
-    mapPin.style = `left: ` + item.location.x + `px; top: ` + item.location.y + `px;`
-    mapPin.querySelector(`img`).src = item.author.avatar
-    mapPin.querySelector(`img`).alt = item.offer.title
+function createPinNode(item) {
+    var PinNode = mapPinTemplate.cloneNode(true)
+    PinNode.style = `left: ` + item.location.x + `px; top: ` + item.location.y + `px;`
+    PinNode.querySelector(`img`).src = item.author.avatar
+    PinNode.querySelector(`img`).alt = item.offer.title
 
-    return mapPin
+    return PinNode
 }
 
 // Функция генерации карточки
@@ -176,34 +176,20 @@ function generateCard(item) {
     return mapCard
 }
 
-// Функция отрисовки меток
-function renderPins(data) {
-    for (var i = 0; i < data.length; i++) {
-        // Создаем новую метку
-        var newPin = generatePin(data[i])
-        newPin.id = `pin${i}`
-
-        // Вставляем метку в DOM
-        var fragment = document.createDocumentFragment()
-        fragment.appendChild(newPin)
-        mapPins.appendChild(fragment)
-
-        // Заполняем карту карточек для меток
-        offersMap[`pin${i}`] = offers[i]
-    }
-}
-
 // Функция отрисовки карточки для метки
-function renderCards(data) {
+function renderCard(node) {
     // Если карточка уже есть в DOM удаляем ее
     var createdCard = document.querySelector(`.map__card`)
     if (createdCard) {
         createdCard.remove()
     }
-    document.querySelector(`.map`).insertBefore(generateCard(offersMap[data]), mapFilters)
 
-    // Вешаем обработчик на закрытие карточки
-    document.querySelector(`.popup__close`).addEventListener(`click`, closeCardPopup)
+    if (offersMap.get(node) !== undefined) {
+        document.querySelector(`.map`).insertBefore(generateCard(offersMap.get(node)), mapFilters)
+
+        // Вешаем обработчик на закрытие карточки
+        document.querySelector(`.popup__close`).addEventListener(`click`, closeCardPopup)
+    }
 }
 
 // Функция включения активного состояния карты
@@ -222,21 +208,35 @@ function onActiveState() {
     mapPinMain.removeEventListener(`mouseup`, function() {})
 
     // Отрисовываем метки похожих объектов
-    renderPins(offers)
+    var fragment = document.createDocumentFragment()
+
+    for (var i = 0; i < offers.length; i++) {
+        // Создаем новую метку
+        var newPin = createPinNode(offers[i])
+
+        // Вставляем метку в фрагмент
+        fragment.appendChild(newPin)
+
+        // Заполняем карту карточек для меток
+        offersMap.set(newPin, offers[i])
+    }
+
+    // Вставляем фрагмент в реальный DOM
+    mapPins.appendChild(fragment)
 
     // Вызываем прослушку события клик по метке
     var mapPinsAll = document.querySelectorAll(`.map__pin`)
 
     for (var i = 1; i < mapPinsAll.length; i++) {
         mapPinsAll[i].addEventListener(`click`, function(e) {
-            var idCurrentPin = e.path[1].id
-            renderCards(idCurrentPin)
+            var pinNode = e.path[1]
+            renderCard(pinNode)
         })
     }
 }
 
 // Функция координаты плавающей метки
-function getAdress (el) {
+function setCordsToAddressInput (el) {
     el = el.getBoundingClientRect()
     var left = el.left + window.scrollX + 20
     var top = el.top + window.scrollY + 22
@@ -252,8 +252,8 @@ function closeCardPopup() {
 // Генерируем данные
 offers = generateData()
 
-// Получаем адрес метки
-getAdress(mapPinMain)
+// Передаем координаты адреса основной метки в инпут формы
+setCordsToAddressInput(mapPinMain)
 
 // После перетаскивания основной метки переводим приложение в активный режим
 mapPinMain.addEventListener(`mouseup`, onActiveState)
