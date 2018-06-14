@@ -70,13 +70,12 @@ var adrInput = document.querySelector('#address');
 // Генерация случайных чисел в диапазоне
 function randomInteger(min, max) {
     var rand = min - 0.5 + Math.random() * (max - min + 1)
-    rand = Math.round(rand);
-    return rand;
+    return Math.round(rand)
 }
 
 // Функция для случайной сортировки массива
 function compareRandom(a, b) {
-    return Math.random() - 0.5;
+    return Math.random() - 0.5
 }
 
 // Функция генерации фичь объекта недвижимости
@@ -96,8 +95,8 @@ function generateData() {
     var newOffers = []
 
     for (var i = 1; i < 9; i++) {
-        var x = randomInteger(300, 900);
-        var y = randomInteger(150, 500);
+        var x = randomInteger(300, 900)
+        var y = randomInteger(150, 500)
 
         newOffers.push(
             {
@@ -131,12 +130,12 @@ function generateData() {
 
 // Функция генерации метки
 function createPinNode(item) {
-    var PinNode = mapPinTemplate.cloneNode(true)
-    PinNode.style = `left: ` + item.location.x + `px; top: ` + item.location.y + `px;`
-    PinNode.querySelector(`img`).src = item.author.avatar
-    PinNode.querySelector(`img`).alt = item.offer.title
+    var pinNode = mapPinTemplate.cloneNode(true)
+    pinNode.style = `left: ` + item.location.x + `px; top: ` + item.location.y + `px;`
+    pinNode.querySelector(`img`).src = item.author.avatar
+    pinNode.querySelector(`img`).alt = item.offer.title
 
-    return PinNode
+    return pinNode
 }
 
 // Функция генерации карточки
