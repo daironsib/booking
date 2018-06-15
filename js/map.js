@@ -63,9 +63,19 @@ var mapFilters = document.querySelector(`.map__filters-container`)
 // Находим плавающую метку
 var mapPinMain = document.querySelector(`.map__pin--main`)
 
-// Находим инпут с адресом
-var adrInput = document.querySelector('#address');
+// Находим input с адресом
+var adrInput = document.querySelector('#address')
 
+// Находим input с ценой объекта
+var priceInput = document.querySelector('#price')
+
+// Находим селекты чекина и чекаута
+var timeinSelect = document.querySelector('#timein')
+var timeoutSelect = document.querySelector('#timeout')
+
+// Находим select количество гостей и его опции
+var capacity = document.querySelector('#capacity')
+var capacityOptions = capacity.querySelectorAll(`option`)
 
 // Генерация случайных чисел в диапазоне
 function randomInteger(min, max) {
@@ -243,10 +253,61 @@ function setCoords (el) {
     adrInput.value = left + ', ' + top
 }
 
-//Функция закрытия карточки
+// Функция закрытия карточки
 function closeCardPopup() {
     document.querySelector(`.popup__close`).removeEventListener(`click`, function(){})
     document.querySelector(`.map__card`).remove()
+}
+
+// Функция изменения select тип жилья
+function typeOfferFunc(select) {
+  if (select.value === `bungalo`) {
+    priceInput.placeholder = 0
+    priceInput.min = 0
+  } else if (select.value === `house`) {
+    priceInput.placeholder = 5000
+    priceInput.min = 5000
+  } else if (select.value === `palace`) {
+    priceInput.placeholder = 10000
+    priceInput.min = 10000
+  } else {
+    priceInput.placeholder = 1000
+    priceInput.min = 1000
+  }
+}
+
+// Функции для чекина и чекаута
+function timeinFunc(select) {
+  timeoutSelect.value = select.value
+}
+
+function timeoutFunc(select) {
+  timeinSelect.value = select.value
+}
+
+function roomNumberFunc(select) {
+  //Ставим всем options disabled
+  for (var i = 0; i < capacityOptions.length; i++) {
+    capacityOptions[i].disabled = true
+  }
+
+
+  if (select.value === `1`) {
+    capacityOptions[2].disabled = false
+    capacityOptions[2].selected = true
+  } else if (select.value === `2`) {
+    capacityOptions[1].disabled = false
+    capacityOptions[2].disabled = false
+    capacityOptions[1].selected = true
+  } else if (select.value === `3`) {
+    capacityOptions[0].disabled = false
+    capacityOptions[1].disabled = false
+    capacityOptions[2].disabled = false
+    capacityOptions[0].selected = true
+  } else {
+    capacityOptions[3].disabled = false
+    capacityOptions[3].selected = true
+  }
 }
 
 // Генерируем данные
