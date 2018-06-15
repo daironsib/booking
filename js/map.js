@@ -286,11 +286,10 @@ function timeoutFunc(select) {
 }
 
 function roomNumberFunc(select) {
-  //Ставим всем options disabled
+  // Ставим всем options disabled
   for (var i = 0; i < capacityOptions.length; i++) {
     capacityOptions[i].disabled = true
   }
-
 
   if (select.value === `1`) {
     capacityOptions[2].disabled = false
