@@ -49,10 +49,22 @@ var offers = []
 var offersMap = new Map()
 
 var roomMap = {
-  1: [true, true, false, true, 2],
-  2: [true, false, false, true, 1],
-  3: [false, false, false, true, 0],
-  100: [true, true, true, false, 3]
+  1: {
+    optionStates: [true, true, false, true],
+    selectItem: 2
+  },
+  2: {
+    optionStates: [true, false, false, true],
+    selectItem: 1
+  },
+  3: {
+    optionStates: [false, false, false, true],
+    selectItem: 0
+  },
+  100: {
+    optionStates: [true, true, true, false],
+    selectItem: 3
+  }
 }
 
 var typesMap = {
@@ -310,13 +322,11 @@ function timeoutFunc() {
 
 // Функция для связки комнат и количества гостей
 function roomNumberFunc() {
-  roomMap[roomNumber.value].forEach(function(item, i) {
-    if (i < 4) {
-      capacityOptions[i].disabled = item
-    } else {
-      capacityOptions[item].selected = true
-    }
+  roomMap[roomNumber.value].optionStates.forEach(function(item, i) {
+    capacityOptions[i].disabled = item
   })
+
+  capacityOptions[roomMap[roomNumber.value].selectItem].selected = true
 }
 
 // Генерируем данные
