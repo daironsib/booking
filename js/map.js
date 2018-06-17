@@ -48,6 +48,20 @@ var offers = []
 
 var offersMap = new Map()
 
+var roomMap = {
+  1: [true, true, false, true, 2],
+  2: [true, false, false, true, 1],
+  3: [false, false, false, true, 0],
+  100: [true, true, true, false, 3]
+}
+
+var typesMap = {
+  bungalo: 0,
+  flat: 1000,
+  house: 5000,
+  palace: 10000
+}
+
 // Находим шаблон для меток
 var mapPinTemplate = document.querySelector(`template`).content.querySelector(`.map__pin`)
 
@@ -76,6 +90,16 @@ var timeoutSelect = document.querySelector('#timeout')
 // Находим select количество гостей и его опции
 var capacity = document.querySelector('#capacity')
 var capacityOptions = capacity.querySelectorAll(`option`)
+
+// Находим select тип жилья
+var typeOfferObject = document.querySelector('#type')
+
+// Находим select для чекина и чекаута
+var timein = document.querySelector('#timein')
+var timeout = document.querySelector('#timeout')
+
+// Находим select количества комнат
+var roomNumber = document.querySelector('#room_number')
 
 // Генерация случайных чисел в диапазоне
 function randomInteger(min, max) {
@@ -243,6 +267,16 @@ function onActiveState() {
             }
         })
     }
+
+    // Вызываем прослушку изменения select тип жилья
+    typeOfferObject.onchange = typeOfferFunc
+
+    // Вызываем прослушку для чекина и чекаута
+    timein.onchange = timeinFunc
+    timeout.onchange = timeoutFunc
+
+    // Вызываем прослушку количества комнат
+    roomNumber.onchange = roomNumberFunc
 }
 
 // Функция координаты плавающей метки
@@ -260,53 +294,29 @@ function closeCardPopup() {
 }
 
 // Функция изменения select тип жилья
-function typeOfferFunc(select) {
-  if (select.value === `bungalo`) {
-    priceInput.placeholder = 0
-    priceInput.min = 0
-  } else if (select.value === `house`) {
-    priceInput.placeholder = 5000
-    priceInput.min = 5000
-  } else if (select.value === `palace`) {
-    priceInput.placeholder = 10000
-    priceInput.min = 10000
-  } else {
-    priceInput.placeholder = 1000
-    priceInput.min = 1000
-  }
+function typeOfferFunc() {
+  priceInput.placeholder = typesMap[typeOfferObject.value]
+  priceInput.min = typesMap[typeOfferObject.value]
 }
 
 // Функции для чекина и чекаута
-function timeinFunc(select) {
-  timeoutSelect.value = select.value
+function timeinFunc() {
+  timeoutSelect.value = timein.value
 }
 
-function timeoutFunc(select) {
-  timeinSelect.value = select.value
+function timeoutFunc() {
+  timeinSelect.value = timeout.value
 }
 
-function roomNumberFunc(select) {
-  // Ставим всем options disabled
-  for (var i = 0; i < capacityOptions.length; i++) {
-    capacityOptions[i].disabled = true
-  }
-
-  if (select.value === `1`) {
-    capacityOptions[2].disabled = false
-    capacityOptions[2].selected = true
-  } else if (select.value === `2`) {
-    capacityOptions[1].disabled = false
-    capacityOptions[2].disabled = false
-    capacityOptions[1].selected = true
-  } else if (select.value === `3`) {
-    capacityOptions[0].disabled = false
-    capacityOptions[1].disabled = false
-    capacityOptions[2].disabled = false
-    capacityOptions[0].selected = true
-  } else {
-    capacityOptions[3].disabled = false
-    capacityOptions[3].selected = true
-  }
+// Функция для связки комнат и количества гостей
+function roomNumberFunc() {
+  roomMap[roomNumber.value].forEach(function(item, i) {
+    if (i < 4) {
+      capacityOptions[i].disabled = item
+    } else {
+      capacityOptions[item].selected = true
+    }
+  })
 }
 
 // Генерируем данные
