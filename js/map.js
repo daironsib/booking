@@ -329,6 +329,14 @@ function roomNumberFunc() {
   capacityOptions[roomMap[roomNumber.value].selectItem].selected = true
 }
 
+function getPosition (elem) {
+  var item = elem.getBoundingClientRect()
+  return {
+    top: item.top + pageYOffset,
+    left: item.left + pageXOffset
+  }
+}
+
 // Генерируем данные
 offers = generateData()
 
@@ -336,4 +344,57 @@ offers = generateData()
 setCoords(mapPinMain)
 
 // После перетаскивания основной метки переводим приложение в активный режим
-mapPinMain.addEventListener(`mouseup`, onActiveState)
+mapPinMain.addEventListener ('mousedown', function(downEvt) {
+  downEvt.preventDefault()
+  onActiveState()
+
+  var pinCoords = getPosition(mapPinMain)
+
+  var shift = {
+    x: downEvt.pageX - pinCoords.left,
+    y: downEvt.pageY - pinCoords.top
+  }
+
+  var mapBoxCoords = getPosition(mapPins)
+
+  function onMouseMove(moveEvt) {
+    moveEvt.preventDefault()
+
+    var newLeft = moveEvt.pageX - shift.x - mapBoxCoords.left
+    var newTop = moveEvt.pageY - shift.y - mapBoxCoords.top
+
+    if (newLeft < 0) {
+      newLeft = 0
+    }
+
+    var rightEdge = mapPins.offsetWidth - mapPinMain.offsetWidth
+
+    if (newLeft > rightEdge) {
+      newLeft = rightEdge
+    }
+
+    if (newTop < 0) {
+      newTop = 0
+    }
+
+    var bottomEdge = mapPins.offsetHeight - mapPinMain.offsetHeight
+
+    if (newTop > bottomEdge) {
+      newTop = bottomEdge
+    }
+
+    mapPinMain.style.top = newTop + `px`
+    mapPinMain.style.left = newLeft + `px`
+    adrInput.value = newLeft + ', ' + newTop
+  }
+
+  function onMouseUp(upEvt) {
+    upEvt.preventDefault()
+
+    document.removeEventListener(`mousemove`, onMouseMove)
+    document.removeEventListener(`mouseup`, onMouseUp)
+  }
+
+  document.addEventListener(`mousemove`, onMouseMove)
+  document.addEventListener(`mouseup`, onMouseUp)
+})
