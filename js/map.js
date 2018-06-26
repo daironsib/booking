@@ -345,7 +345,6 @@ setCoords(mapPinMain)
 
 // После перетаскивания основной метки переводим приложение в активный режим
 mapPinMain.addEventListener ('mousedown', function(downEvt) {
-  downEvt.preventDefault()
   onActiveState()
 
   var pinCoords = getPosition(mapPinMain)
@@ -358,8 +357,6 @@ mapPinMain.addEventListener ('mousedown', function(downEvt) {
   var mapBoxCoords = getPosition(mapPins)
 
   function onMouseMove(moveEvt) {
-    moveEvt.preventDefault()
-
     var newLeft = moveEvt.pageX - shift.x - mapBoxCoords.left
     var newTop = moveEvt.pageY - shift.y - mapBoxCoords.top
 
@@ -385,11 +382,13 @@ mapPinMain.addEventListener ('mousedown', function(downEvt) {
 
     mapPinMain.style.top = newTop + `px`
     mapPinMain.style.left = newLeft + `px`
-    adrInput.value = newLeft + ', ' + newTop
+
+    var newTopCoords = newTop + 84
+    var newLeftCoords = newTop + 31
+    adrInput.value = newLeftCoords + ', ' + newTopCoords
   }
 
-  function onMouseUp(upEvt) {
-    upEvt.preventDefault()
+  function onMouseUp() {
 
     document.removeEventListener(`mousemove`, onMouseMove)
     document.removeEventListener(`mouseup`, onMouseUp)
