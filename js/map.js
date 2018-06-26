@@ -113,128 +113,6 @@ var timeout = document.querySelector('#timeout')
 // Находим select количества комнат
 var roomNumber = document.querySelector('#room_number')
 
-// Генерация случайных чисел в диапазоне
-function randomInteger(min, max) {
-    var rand = min - 0.5 + Math.random() * (max - min + 1)
-    return Math.round(rand)
-}
-
-// Функция для случайной сортировки массива
-function compareRandom(a, b) {
-    return Math.random() - 0.5
-}
-
-// Функция генерации фичь объекта недвижимости
-function getFeatures(array) {
-    var limit = randomInteger(1, array.length - 1)
-    var newArray = []
-
-    for (var i = 0; i < limit; i++) {
-        newArray.push(array[i])
-    }
-
-    return newArray
-}
-
-// Функция генерации данных
-function generateData() {
-    var newOffers = []
-
-    for (var i = 1; i < 9; i++) {
-        var x = randomInteger(300, 900)
-        var y = randomInteger(150, 500)
-
-        newOffers.push(
-            {
-                author: {
-                    avatar: `img/avatars/user0` + i + `.png`
-                },
-                offer: {
-                    title: titles[i-1],
-                    address: x + ', ' + y,
-                    price: randomInteger(1000, 1000000),
-                    type: types[randomInteger(0, 3)],
-                    rooms: randomInteger(1, 5),
-                    guests: randomInteger(1, 10),
-                    checkin: times[randomInteger(0, 2)],
-                    checkout: times[randomInteger(0, 2)],
-                    features: getFeatures(features),
-                    description: '',
-                    photos: photos.sort(compareRandom)
-                },
-
-                location: {
-                    x: x,
-                    y: y
-                }
-            }
-        )
-    }
-
-    return newOffers
-}
-
-// Функция генерации метки
-function createPinNode(item) {
-    var pinNode = mapPinTemplate.cloneNode(true)
-    pinNode.style = `left: ` + item.location.x + `px; top: ` + item.location.y + `px;`
-    pinNode.querySelector(`img`).src = item.author.avatar
-    pinNode.querySelector(`img`).alt = item.offer.title
-
-    return pinNode
-}
-
-// Функция генерации карточки
-function generateCard(item) {
-    var mapCard = mapCardTemplate.cloneNode(true)
-
-    mapCard.querySelector(`.popup__title`).textContent = item.offer.title
-    mapCard.querySelector(`.popup__text--address`).textContent = item.offer.address
-    mapCard.querySelector(`.popup__text--price`).textContent = item.offer.price + `₽/ночь`
-    mapCard.querySelector(`.popup__type`).textContent = typesNames[item.offer.type]
-    mapCard.querySelector(`.popup__text--capacity`).textContent = item.offer.rooms + ` комнаты для ` + item.offer.guests + ` гостей`
-    mapCard.querySelector(`.popup__text--time`).textContent = `Заезд после ` + item.offer.checkin + `, выезд до ` + item.offer.checkout
-
-   var featuresBlock = mapCard.querySelector(`.popup__features`)
-    featuresBlock.innerHTML = ''
-
-    for (var i = 0; i < item.offer.features.length; i++) {
-        var feature = document.createElement(`li`)
-        feature.className = `popup__feature popup__feature--` + item.offer.features[i]
-        featuresBlock.appendChild(feature)
-    }
-
-    mapCard.querySelector(`.popup__description`).textContent = item.offer.description
-
-    var photoBlock = mapCard.querySelector(`.popup__photos`)
-    var photoItem = photoBlock.querySelector(`img`)
-    photoBlock.removeChild(photoItem)
-
-    for (i = 0; i < item.offer.photos.length; i++) {
-        var photo = photoItem.cloneNode(true)
-        photo.src = item.offer.photos[i]
-        photoBlock.appendChild(photo)
-    }
-
-    mapCard.querySelector(`.popup__avatar`).src = item.author.avatar
-
-    return mapCard
-}
-
-// Функция отрисовки карточки для метки
-function renderCard(node) {
-    // Если карточка уже есть в DOM удаляем ее
-    var createdCard = document.querySelector(`.map__card`)
-    if (createdCard) {
-        createdCard.remove()
-    }
-
-    document.querySelector(`.map`).insertBefore(generateCard(offersMap.get(node)), mapFilters)
-
-    // Вешаем обработчик на закрытие карточки
-    document.querySelector(`.popup__close`).addEventListener(`click`, closeCardPopup)
-}
-
 // Функция включения активного состояния карты
 function onActiveState() {
     // Включаем карту
@@ -255,7 +133,7 @@ function onActiveState() {
 
     for (var i = 0; i < offers.length; i++) {
         // Создаем новую метку
-        var newPin = createPinNode(offers[i])
+        var newPin = window.createPinNode(offers[i])
 
         // Вставляем метку в фрагмент
         fragment.appendChild(newPin)
@@ -273,22 +151,22 @@ function onActiveState() {
     for (var i = 1; i < mapPinsAll.length; i++) {
         mapPinsAll[i].addEventListener(`click`, function(e) {
             if (e.target.classList.contains(`map__pin`)) {
-                renderCard(e.target)
+                window.renderCard(e.target)
             } else {
-                renderCard(e.target.parentNode)
+              window.renderCard(e.target.parentNode)
             }
         })
     }
 
     // Вызываем прослушку изменения select тип жилья
-    typeOfferObject.onchange = typeOfferFunc
+    typeOfferObject.onchange = window.typeOfferFunc
 
     // Вызываем прослушку для чекина и чекаута
-    timein.onchange = timeinFunc
-    timeout.onchange = timeoutFunc
+    timein.onchange = window.timeinFunc
+    timeout.onchange = window.timeoutFunc
 
     // Вызываем прослушку количества комнат
-    roomNumber.onchange = roomNumberFunc
+    roomNumber.onchange = window.roomNumberFunc
 }
 
 // Функция координаты плавающей метки
@@ -305,30 +183,6 @@ function closeCardPopup() {
     document.querySelector(`.map__card`).remove()
 }
 
-// Функция изменения select тип жилья
-function typeOfferFunc() {
-  priceInput.placeholder = typesMap[typeOfferObject.value]
-  priceInput.min = typesMap[typeOfferObject.value]
-}
-
-// Функции для чекина и чекаута
-function timeinFunc() {
-  timeoutSelect.value = timein.value
-}
-
-function timeoutFunc() {
-  timeinSelect.value = timeout.value
-}
-
-// Функция для связки комнат и количества гостей
-function roomNumberFunc() {
-  roomMap[roomNumber.value].optionStates.forEach(function(item, i) {
-    capacityOptions[i].disabled = item
-  })
-
-  capacityOptions[roomMap[roomNumber.value].selectItem].selected = true
-}
-
 function getPosition (elem) {
   var item = elem.getBoundingClientRect()
   return {
@@ -338,7 +192,7 @@ function getPosition (elem) {
 }
 
 // Генерируем данные
-offers = generateData()
+offers = window.generateData()
 
 // Передаем координаты адреса основной метки в инпут формы
 setCoords(mapPinMain)
@@ -383,9 +237,11 @@ mapPinMain.addEventListener ('mousedown', function(downEvt) {
     mapPinMain.style.top = newTop + `px`
     mapPinMain.style.left = newLeft + `px`
 
-    var newTopCoords = newTop + 84
-    var newLeftCoords = newTop + 31
+
+    var newTopCoords = newTop + 22
+    var newLeftCoords = newTop + 20
     adrInput.value = newLeftCoords + ', ' + newTopCoords
+
   }
 
   function onMouseUp() {
