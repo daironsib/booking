@@ -1,39 +1,26 @@
 // Файл data.js — модуль, который генерирует фейковые данные
 'use strict'
 
-window.generateData = function () {
-  var newOffers = []
+var offers = []
 
-  for (var i = 1; i < 9; i++) {
-    var x = window.util.getRandomInt(300, 900)
-    var y = window.util.getRandomInt(150, 500)
-
-    newOffers.push(
-      {
-        author: {
-          avatar: `img/avatars/user0` + i + `.png`
-        },
-        offer: {
-          title: titles[i-1],
-          address: x + ', ' + y,
-          price: window.util.getRandomInt(1000, 1000000),
-          type: types[window.util.getRandomInt(0, 3)],
-          rooms: window.util.getRandomInt(1, 5),
-          guests: window.util.getRandomInt(1, 10),
-          checkin: times[window.util.getRandomInt(0, 2)],
-          checkout: times[window.util.getRandomInt(0, 2)],
-          features: window.getFeatures(features),
-          description: '',
-          photos: photos.sort(window.util.compareRandom)
-        },
-
-        location: {
-          x: x,
-          y: y
-        }
-      }
-    )
-  }
-
-  return newOffers
+// Функция успешного получения предложений с сервера
+function recievedHandler(data) {
+  offers = data
 }
+
+// Функция вывода ошибки получения данных о предложениях
+window.errorHandler = function (errorMessage) {
+  var node = document.createElement('div')
+  node.style = 'z-index: 100; width: 100%; text-align: center; background-color: red; padding: 15px 0;'
+  node.style.position = 'absolute'
+  node.style.top = 0
+  node.style.left = 0
+  node.style.right = 0
+  node.style.fontSize = '25px'
+
+  node.textContent = errorMessage
+  document.body.insertAdjacentElement('afterbegin', node)
+}
+
+// Подгружаем данные о предложениях с сервера
+window.backend.load(recievedHandler, window.errorHandler)

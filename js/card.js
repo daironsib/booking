@@ -1,6 +1,13 @@
 // Файл card.js — модуль, который отвечает за создание карточки объявлений
 'use strict'
 
+var typesNames = {
+  palace: `Дворец`,
+  flat: `Квартира`,
+  house: `Дом`,
+  bungalo: `Бунгало`
+}
+
 // Функция генерации карточки
 window.generateCard = function (item) {
   var mapCard = mapCardTemplate.cloneNode(true)

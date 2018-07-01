@@ -1,78 +1,4 @@
-var titles = [
-    `Большая уютная квартира`,
-    `Маленькая неуютная квартира`,
-    `Огромный прекрасный дворец`,
-    `Маленький ужасный дворец`,
-    `Красивый гостевой домик`,
-    `Некрасивый негостеприимный домик`,
-    `Уютное бунгало далеко от моря`,
-    `Неуютное бунгало по колено в воде`
-]
-
-var types = [
-    `palace`,
-    `flat`,
-    `house`,
-    `bungalo`
-]
-
-var typesNames = {
-    palace: `Дворец`,
-    flat: `Квартира`,
-    house: `Дом`,
-    bungalo: `Бунгало`
-}
-
-var times = [
-    `12:00`,
-    `13:00`,
-    `14:00`
-]
-
-var features = [
-    `wifi`,
-    `dishwasher`,
-    `parking`,
-    `washer`,
-    `elevator`,
-    `conditioner`
-]
-
-var photos = [
-    `http://o0.github.io/assets/images/tokyo/hotel1.jpg`,
-    `http://o0.github.io/assets/images/tokyo/hotel2.jpg`,
-    `http://o0.github.io/assets/images/tokyo/hotel3.jpg`
-]
-
-var offers = []
-
 var offersMap = new Map()
-
-var roomMap = {
-  1: {
-    optionStates: [true, true, false, true],
-    selectItem: 2
-  },
-  2: {
-    optionStates: [true, false, false, true],
-    selectItem: 1
-  },
-  3: {
-    optionStates: [false, false, false, true],
-    selectItem: 0
-  },
-  100: {
-    optionStates: [true, true, true, false],
-    selectItem: 3
-  }
-}
-
-var typesMap = {
-  bungalo: 0,
-  flat: 1000,
-  house: 5000,
-  palace: 10000
-}
 
 // Находим шаблон для меток
 var mapPinTemplate = document.querySelector(`template`).content.querySelector(`.map__pin`)
@@ -101,7 +27,6 @@ var timeoutSelect = document.querySelector('#timeout')
 
 // Находим select количество гостей и его опции
 var capacity = document.querySelector('#capacity')
-var capacityOptions = capacity.querySelectorAll(`option`)
 
 // Находим select тип жилья
 var typeOfferObject = document.querySelector('#type')
@@ -169,6 +94,33 @@ function onActiveState() {
     roomNumber.onchange = window.roomNumberFunc
 }
 
+window.offActiveState = function () {
+  document.querySelector(`.map`).classList.add(`map--faded`)
+  document.querySelector(`.ad-form`).classList.add(`ad-form--disabled`)
+  document.querySelector(`.map`).classList.add(`map--faded`)
+
+  var allFieldsets = document.querySelectorAll(`fieldset`)
+
+  for(var i = 0; i < allFieldsets.length; i++) {
+    allFieldsets[i].disabled = true
+  }
+
+  mapPinMain.style = `left: 570px; top: 375px;`
+
+  var mapPinsAll = document.querySelectorAll(`.map__pin`)
+
+  for (var i = 1; i < mapPinsAll.length; i++) {
+    mapPinsAll[i].classList.add('hidden')
+  }
+
+  if (document.querySelector('.map__card')) {
+    document.querySelector('.map__card').remove()
+  }
+
+  // Прокручиваем страницу наверх
+  document.body.scrollTop = document.documentElement.scrollTop = 0
+}
+
 // Функция координаты плавающей метки
 function setCoords (el) {
     el = el.getBoundingClientRect()
@@ -190,9 +142,6 @@ function getPosition (elem) {
     left: item.left + pageXOffset
   }
 }
-
-// Генерируем данные
-offers = window.generateData()
 
 // Передаем координаты адреса основной метки в инпут формы
 setCoords(mapPinMain)
