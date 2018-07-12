@@ -38,6 +38,50 @@ var timeout = document.querySelector('#timeout')
 // Находим select количества комнат
 var roomNumber = document.querySelector('#room_number')
 
+// Функция отрисовки меток
+function renderAllPins(offers) {
+  // Удаляем все нарисованные метки
+  var mapPinsAll = document.querySelectorAll(`.map__pin`)
+  mapPinsAll.forEach(function (el, i) {
+    if (i > 0) {
+      el.remove()
+    }
+  })
+
+  var fragment = document.createDocumentFragment()
+
+  for (var i = 0; i < offers.length; i++) {
+    // Создаем новую метку
+    var newPin = window.createPinNode(offers[i])
+
+    // Вставляем метку в фрагмент
+    fragment.appendChild(newPin)
+
+    // Заполняем карту карточек для меток
+    offersMap.set(newPin, offers[i])
+  }
+
+  // Вставляем фрагмент в реальный DOM
+  mapPins.appendChild(fragment)
+}
+
+// Функция назначения прослушки по меткам для рендера карточки
+function setListenersForPins() {
+  var mapPinsAll = document.querySelectorAll(`.map__pin`)
+
+  mapPinsAll.forEach(function (el, i) {
+    if (i > 0) {
+      el.addEventListener(`click`, function(e) {
+        if (e.target.classList.contains(`map__pin`)) {
+          window.renderCard(e.target)
+        } else {
+          window.renderCard(e.target.parentNode)
+        }
+      })
+    }
+  })
+}
+
 // Функция включения активного состояния карты
 function onActiveState() {
     // Включаем карту
@@ -54,34 +98,10 @@ function onActiveState() {
     mapPinMain.removeEventListener(`mouseup`, function() {})
 
     // Отрисовываем метки похожих объектов
-    var fragment = document.createDocumentFragment()
-
-    for (var i = 0; i < offers.length; i++) {
-        // Создаем новую метку
-        var newPin = window.createPinNode(offers[i])
-
-        // Вставляем метку в фрагмент
-        fragment.appendChild(newPin)
-
-        // Заполняем карту карточек для меток
-        offersMap.set(newPin, offers[i])
-    }
-
-    // Вставляем фрагмент в реальный DOM
-    mapPins.appendChild(fragment)
+    renderAllPins(offers)
 
     // Вызываем прослушку события клик по метке
-    var mapPinsAll = document.querySelectorAll(`.map__pin`)
-
-    for (var i = 1; i < mapPinsAll.length; i++) {
-        mapPinsAll[i].addEventListener(`click`, function(e) {
-            if (e.target.classList.contains(`map__pin`)) {
-                window.renderCard(e.target)
-            } else {
-              window.renderCard(e.target.parentNode)
-            }
-        })
-    }
+    setListenersForPins()
 
     // Вызываем прослушку изменения select тип жилья
     typeOfferObject.onchange = window.typeOfferFunc

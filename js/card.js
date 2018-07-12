@@ -57,13 +57,17 @@ window.getFeatures = function (array) {
   return newArray
 }
 
-// Функция отрисовки карточки для метки
-window.renderCard = function (node) {
-  // Если карточка уже есть в DOM удаляем ее
+window.removeAllCards = function () {
   var createdCard = document.querySelector(`.map__card`)
   if (createdCard) {
     createdCard.remove()
   }
+}
+
+// Функция отрисовки карточки для метки
+window.renderCard = function (node) {
+  // Если карточка уже есть в DOM удаляем ее
+  window.removeAllCards()
 
   document.querySelector(`.map`).insertBefore(window.generateCard(offersMap.get(node)), mapFilters)
 
