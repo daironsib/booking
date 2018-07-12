@@ -1,7 +1,7 @@
 // Файл filter.js
 'use strict';
 
-(function () {
+window.filter = (function () {
   var mapFilters = document.querySelector(`.map__filters`)
   var housingType = document.querySelector(`#housing-type`)
   var housingPrice = document.querySelector(`#housing-price`)
@@ -50,16 +50,9 @@
     return answer
   }
 
-
-
-  mapFilters.addEventListener(`change`, function() {
-    // Обновляем состояние фильтра
-    createFilterState()
-
-    //Если есть открытые карточки, удаляем их
-    window.removeAllCards()
-
-    var filteredTypeOffers = offers.filter(function(el) {
+  // Функция фильтрации офферов
+  function filterOffers(offers) {
+    var newArray = offers.filter(function(el) {
       if (el.offer.type === filters.type || filters.type === `any`) {
         // Переходим к фильтру по цене
         if (priceConvert(el.offer.price) === filters.price || filters.price === `any`) {
@@ -91,10 +84,22 @@
         } else return false
       } else return false
     })
+    return newArray
+  }
 
-    renderAllPins(filteredTypeOffers)
+  mapFilters.addEventListener(`change`, function() {
+    // Обновляем состояние фильтра
+    createFilterState()
+
+    //Если есть открытые карточки, удаляем их
+    window.card.removeAllCards()
+
+    var filteredOffers = filterOffers(offers)
+
+    // Перерендер офферов
+    window.debounce(window.pin.renderAllPins(filteredOffers))
 
     // Вызываем прослушку события клик по метке
-    setListenersForPins()
+    window.card.setListenersForPins()
   })
 })()
