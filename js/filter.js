@@ -10,7 +10,7 @@ window.filter = (function () {
   var mapCheckbox = document.querySelectorAll(`.map__checkbox`)
 
   var filters = {}
-  var featuresArr = []
+  var features = []
 
   // Функция для обновления состояния фильтра
   function createFilterState() {
@@ -19,23 +19,15 @@ window.filter = (function () {
       price: housingPrice.value,
       rooms: housingRooms.value,
       guests: housingQuests.value,
-      features: {
-        wifi: mapCheckbox[0].checked,
-        dishwasher: mapCheckbox[1].checked,
-        parking: mapCheckbox[2].checked,
-        washer: mapCheckbox[3].checked,
-        elevator: mapCheckbox[4].checked,
-        conditioner: mapCheckbox[5].checked
-      }
     }
 
     // Форумируем массив выбранных фич
-    featuresArr = []
-    for (var key in filters.features) {
-      if (filters.features[key] === true) {
-        featuresArr.push(key)
+    features = []
+    mapCheckbox.forEach(function(item) {
+      if (item.checked) {
+        features.push(item.value)
       }
-    }
+    })
   }
 
   // Функция конвертирования цены
@@ -50,39 +42,38 @@ window.filter = (function () {
     return answer
   }
 
+  // Функция housing фильтрации
+  function housingFilter(offer) {
+    for (var key in filters) {
+      // Конвертируем количество гостей в число
+      if (filters[`guests`] !== `any`) filters[`guests`] = Number(filters[`guests`])
+
+      // Конвертируем количество комнат в число
+      if (filters[`rooms`] !== `any`) filters[`rooms`] = Number(filters[`rooms`])
+
+      if (key === `price`) {
+        if (filters[key] !== `any` && filters[key] !== priceConvert(offer[key])) return false
+      } else {
+        if (filters[key] !== `any` && filters[key] !== offer[key]) return false
+      }
+    }
+    return true
+  }
+
+  // Функция фильтрации фич
+  function featuresFilter(offer) {
+    var filteredFeatures = features.filter(function (feature) {
+      return offer.features.indexOf(feature) !== -1
+    })
+
+    return filteredFeatures.length === features.length
+  }
+
   // Функция фильтрации офферов
   function filterOffers(offers) {
     var newArray = offers.filter(function(el) {
-      if (el.offer.type === filters.type || filters.type === `any`) {
-        // Переходим к фильтру по цене
-        if (priceConvert(el.offer.price) === filters.price || filters.price === `any`) {
-          // Переходим к фильтру по кол комнат
-          if (Number(el.offer.rooms) === Number(filters.rooms) || filters.rooms === `any`) {
-            // Переходим к фильтру по кол гостей
-            if (Number(el.offer.guests) === Number(filters.guests) || filters.guests === `any`) {
-              // Проверяем чекнуты ли фича фильтры
-              var offerFeatures = el.offer.features
-              if (featuresArr.length === 0) return true
-              else {
-                // Проверяем есть ли у оффера фичи
-                if (offerFeatures.length > 0) {
-                  var featuresFlag = 0
-                  // Ищем совпадения фич
-                  featuresArr.forEach(function(el) {
-                    offerFeatures.forEach(function(offerEl) {
-                      if (el === offerEl) {
-                        featuresFlag++
-                      }
-                    })
-                  })
-                  // Если количество выбранных и счетчика совпадает возвращаем true
-                  if (featuresArr.length === featuresFlag) return true; else false
-                } else return false
-              }
-            } else return false
-          } else return false
-        } else return false
-      } else return false
+      if (housingFilter(el.offer)) return featuresFilter(el.offer)
+      else return false
     })
     return newArray
   }
