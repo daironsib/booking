@@ -9,12 +9,17 @@ window.filter = (function () {
   var housingQuests = document.querySelector(`#housing-guests`)
   var mapCheckbox = document.querySelectorAll(`.map__checkbox`)
 
-  var filters = {}
-  var features = []
+  //var filters = {}
+  //var features = []
+
+  var filters = {
+    selects: {},
+    features: []
+  }
 
   // Функция для обновления состояния фильтра
   function createFilterState() {
-    filters = {
+    filters.selects = {
       type: housingType.value,
       price: housingPrice.value,
       rooms: housingRooms.value,
@@ -22,10 +27,9 @@ window.filter = (function () {
     }
 
     // Форумируем массив выбранных фич
-    features = []
     mapCheckbox.forEach(function(item) {
       if (item.checked) {
-        features.push(item.value)
+        filters.features.push(item.value)
       }
     })
   }
@@ -44,17 +48,18 @@ window.filter = (function () {
 
   // Функция housing фильтрации
   function housingFilter(offer) {
-    for (var key in filters) {
+    for (var key in filters.selects) {
+      //if (filters[key] === `any`) return true
       // Конвертируем количество гостей в число
-      if (filters[`guests`] !== `any`) filters[`guests`] = Number(filters[`guests`])
+      if (filters.selects[`guests`] !== `any`) filters.selects[`guests`] = Number(filters.selects[`guests`])
 
       // Конвертируем количество комнат в число
-      if (filters[`rooms`] !== `any`) filters[`rooms`] = Number(filters[`rooms`])
+      if (filters.selects[`rooms`] !== `any`) filters.selects[`rooms`] = Number(filters.selects[`rooms`])
 
       if (key === `price`) {
-        if (filters[key] !== `any` && filters[key] !== priceConvert(offer[key])) return false
+        if (filters.selects[key] !== `any` && filters.selects[key] !== priceConvert(offer[key])) return false
       } else {
-        if (filters[key] !== `any` && filters[key] !== offer[key]) return false
+        if (filters.selects[key] !== `any` && filters.selects[key] !== offer[key]) return false
       }
     }
     return true
@@ -62,11 +67,11 @@ window.filter = (function () {
 
   // Функция фильтрации фич
   function featuresFilter(offer) {
-    var filteredFeatures = features.filter(function (feature) {
+    var filteredFeatures = filters.features.filter(function (feature) {
       return offer.features.indexOf(feature) !== -1
     })
 
-    return filteredFeatures.length === features.length
+    return filteredFeatures.length === filters.features.length
   }
 
   // Функция фильтрации офферов
