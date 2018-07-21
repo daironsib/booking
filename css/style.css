@@ -1213,3 +1213,13 @@ fieldset {
       -ms-transform: translateX(-50%);
           transform: translateX(-50%);
 }
+
+.ad-form__photo {
+  overflow: hidden;
+}
+
+.ad-form__photo img {
+  object-fit: cover;
+  height: 100%;
+  width: 100%;
+}

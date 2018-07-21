@@ -61,6 +61,65 @@ window.form = (function () {
   var capacityOptions = yourCapacity.querySelectorAll('option')
   var yourDescription = document.getElementById('description')
 
+  var inputAvaMap = document.querySelector(`.ad-form-header__input`)
+  var adAvaPreview = document.querySelector(`.ad-form-header__preview img`)
+
+  var adFormInput = document.querySelector(`.ad-form__input`)
+  var adFormPhotoCont = document.querySelector(`.ad-form__photo`)
+  var adFormAllPhotoCont = document.querySelector(`.ad-form__photo-container`)
+
+  var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png']
+
+  // Обработчики загрузки фоток для оффера
+  inputAvaMap.addEventListener('change', function () {
+    var file = inputAvaMap.files[0]
+    var fileName = file.name.toLowerCase()
+
+    var matches = FILE_TYPES.some(function (it) {
+      return fileName.endsWith(it)
+    })
+
+    if (matches) {
+      var reader = new FileReader()
+
+      reader.addEventListener('load', function () {
+        adAvaPreview.src = reader.result
+      })
+
+      reader.readAsDataURL(file)
+    }
+  })
+
+  adFormInput.addEventListener('change', function () {
+    var file = adFormInput.files[0]
+    var fileName = file.name.toLowerCase()
+
+    var matches = FILE_TYPES.some(function (it) {
+      return fileName.endsWith(it)
+    })
+
+    if (matches) {
+      var reader = new FileReader()
+
+      reader.addEventListener('load', function () {
+        var img = document.createElement('img')
+        img.src = reader.result
+
+        // Проверяем нет ли добавленной фотографии
+        if (adFormPhotoCont.childNodes.length === 0) {
+          adFormPhotoCont.appendChild(img)
+        } else {
+          var photoCont = document.createElement(`div`)
+          photoCont.classList.add(`ad-form__photo`)
+          photoCont.appendChild(img)
+          adFormAllPhotoCont.appendChild(photoCont)
+        }
+      })
+
+      reader.readAsDataURL(file)
+    }
+  })
+
   // Функция очистки значений форм объявления
   function clearValues() {
     yourHomeTitle.value = ``
